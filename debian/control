@@ -1,0 +1,13 @@
+Source: plegger
+Priority: important
+Section: misc
+Maintainer: Chris Obbard <chris@64studio.com>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.9.3
+
+Package: plegger
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}
+Description: plegger package
+ Long Description of plegger
