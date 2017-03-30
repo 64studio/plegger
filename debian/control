@@ -7,7 +7,6 @@ Standards-Version: 3.9.3
 
 Package: plegger
 Architecture: all
-Multi-Arch: foreign
 Depends: dnsmasq, hostapd, nodejs, ${misc:Depends}
 Description: plegger package
  Long Description of plegger

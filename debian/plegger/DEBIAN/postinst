@@ -1,5 +1,0 @@
-#!/bin/sh
-set -e if [ "$1" = 'configure' -a -n "$2" ]; then
-    # install
-
-
