@@ -1,2 +1,3 @@
-# plegger
-Testing
+Build with:
+
+dpkg-buildpackage -aarmhf -I.git
