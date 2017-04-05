@@ -1,0 +1,10 @@
+
+Global packages needed;
+
+  npm -g install browserify
+
+
+To compile;
+
+  browserify src/client/plegger_client.js -t babelify --outfile web/pleg_cfe.js
+
