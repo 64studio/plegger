@@ -1,4 +1,4 @@
 plegger usr/share/plegger
 webapp/* usr/share/plegger/webapp
-conf/hostapd.conf /etc/hostapd/hostapd.conf
-conf/dnsmasq.conf /etc/dnsmasq.d/dnsmasq.conf
+conf/hostapd.conf /etc/hostapd
+conf/dnsmasq.conf /etc/dnsmasq.d
