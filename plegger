@@ -11,16 +11,16 @@ REC_PATH="/home/pi/recordings"
 THRESHOLD=1%
 
 # set the duration of sound before recording starts
-START_DELAY=0.1
+START_DELAY=0
 
 # set the duration of silence before recording ends
-END_DELAY=10.0
+END_DELAY=5.0
 
 # set ALSA as the recording mode for sox
 export AUDIODRIVER=alsa
 
-# set a large input buffer to avoid recording glitches
-export SOX_OPTS="--input-buffer 64000"
+# set a large buffer to avoid recording glitches
+export SOX_OPTS="--buffer 128000"
 
 # tell sox which ALSA device to use
 export AUDIODEV=hw:0
