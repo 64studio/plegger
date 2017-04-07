@@ -1,3 +1,12 @@
 Build with:
 
 dpkg-buildpackage -aarmhf -I.git
+
+Or install dependencies manually:
+
+sudo apt-get install dnsmasq hostapd
+
+Install current nodejs from 4.x branch:
+
+curl -sL https://deb.nodesource.com/setup_4.x | sudo bash -
+sudo apt-get install -y nodejs
