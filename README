@@ -2,11 +2,32 @@ Build with:
 
 dpkg-buildpackage -aarmhf -I.git
 
-Or install dependencies manually:
+Or:
+
+1. Install dependencies manually:
 
 sudo apt-get install dnsmasq hostapd
 
-Install current nodejs from 4.x branch:
+2. Install current nodejs from 4.x branch:
 
 curl -sL https://deb.nodesource.com/setup_4.x | sudo bash -
 sudo apt-get install -y nodejs
+
+3. Clone this repo:
+
+git clone https://github.com/64studio/plegger.git
+
+4. Add configs from the conf directory to their respective places:
+
+sudo nano /etc/dnsmasq.conf
+sudo cp conf/hostapd.conf /etc/hostapd/
+
+5. Update the path for hostapd config in /etc/default/hostapd as follows:
+	
+DAEMON_CONF=/etc/hostapd/hostapd.conf
+
+6. Set a local domain in /etc/hosts
+
+10.0.0.1  hw.plegger
+
+See https://frillip.com/using-your-raspberry-pi-3-as-a-wifi-access-point-with-hostapd/
