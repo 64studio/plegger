@@ -1,0 +1,8 @@
+[Match]
+Name=wlan0
+
+[Network]
+DHCP=no
+DNS=10.0.0.1
+Address=10.0.0.1/24
+Gateway=10.0.0.1
