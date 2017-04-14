@@ -3,7 +3,12 @@ set -e if [ "$1" = 'configure' -a -n "$2" ]; then
     # install
     echo "DAEMON_CONF=\"/etc/hostapd/hostapd.conf\"" > /etc/default/hostapd
     systemctl enable dnsmasq
+    systemctl start dnsmasq
     systemctl enable hostapd
+    systemctl start hostapd
+    # Install and start recording daemon
+    systemctl enable plegger
+    systemctl start plegger
     exit 0
 
 #DEBHELPER#
