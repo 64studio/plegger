@@ -1,12 +1,16 @@
 Source: plegger
 Priority: optional
-Section: misc
+Section: sound
 Maintainer: Chris Obbard <chris@64studio.com>
-Build-Depends: debhelper (>= 9)
-Standards-Version: 3.9.3
+Build-Depends: debhelper (>= 10)
+Standards-Version: 3.9.8
 
 Package: plegger
 Architecture: all
-Depends: dnsmasq, hostapd, nodejs, ${misc:Depends}
-Description: plegger package
- Long Description of plegger
+Depends: sox, libsox-fmt-mp3, dnsmasq, hostapd, nodejs (>= 4.7), ${misc:Depends}
+Description: PiDeck Bootlegger
+ The PiDeck Bootlegger is designed to record whenever audio is present on the 
+ default ALSA input device. It uses sox to record 192k MP3s and timestamp them. 
+ These files are made available through a web browser interface on a local wireless 
+ network to anyone with the WiFi password, which can then be uploaded to a sharing 
+ service such as Mixcloud.
