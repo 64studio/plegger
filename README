@@ -35,3 +35,12 @@ DAEMON_CONF=/etc/hostapd/hostapd.conf
 10.0.0.1  hw.plegger
 
 See https://frillip.com/using-your-raspberry-pi-3-as-a-wifi-access-point-with-hostapd/
+
+
+Installation
+
+cd /usr/share/plegger/webapp
+sudo update-alternatives --install /usr/bin/node node /usr/bin/nodejs 10
+sudo npm install
+sudo npm install -g browserify
+sudo browserify src/client/plegger_client.js -t babelify --outfile web/pleg_cfe.js

@@ -12,10 +12,10 @@ if [ "$1" = 'configure' ]; then
     deb-systemd-invoke start plegger
 
     # setup webapp
-    cd /usr/share/plegger/webapp
-    npm install
-    npm install -g browserify
-    browserify src/client/plegger_client.js -t babelify --outfile web/pleg_cfe.js
+    #cd /usr/share/plegger/webapp
+    #npm install
+    #npm install -g browserify
+    #browserify src/client/plegger_client.js -t babelify --outfile web/pleg_cfe.js
 
     exit 0
 fi
