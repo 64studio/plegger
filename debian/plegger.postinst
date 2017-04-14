@@ -1,5 +1,6 @@
 #!/bin/sh
-set -e if [ "$1" = 'configure' -a -n "$2" ]; then
+set -e
+if [ "$1" = 'configure' -a -n "$2" ]; then
     # install
     echo "DAEMON_CONF=\"/etc/hostapd/hostapd.conf\"" > /etc/default/hostapd
     systemctl enable dnsmasq
@@ -10,5 +11,6 @@ set -e if [ "$1" = 'configure' -a -n "$2" ]; then
     systemctl enable plegger
     systemctl start plegger
     exit 0
+fi
 
 #DEBHELPER#
