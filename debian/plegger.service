@@ -1,0 +1,11 @@
+[Unit]
+Description="Recording script using sox"
+
+[Service]
+TimeoutStartSec=0
+User=pi
+ExecStart=/usr/bin/plegger
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
