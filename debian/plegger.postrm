@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e
-if [ "$1" = "purge" ] then
+if [ "$1" = "purge" ]; then
     # remove
 fi
 
