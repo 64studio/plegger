@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e
-if [ "$1" = 'configure' -a -n "$2" ]; then
+if [ "$1" = 'configure' ]; then
     # install
     echo "DAEMON_CONF=\"/etc/hostapd/hostapd.conf\"" > /etc/default/hostapd
     deb-systemd-invoke enable dnsmasq
@@ -10,6 +10,13 @@ if [ "$1" = 'configure' -a -n "$2" ]; then
     # Install and start recording daemon
     deb-systemd-invoke enable plegger
     deb-systemd-invoke start plegger
+
+    # setup webapp
+    cd /usr/share/plegger/webapp
+    npm install
+    npm install -g browserify
+    browserify src/client/plegger_client.js -t babelify --outfile web/pleg_cfe.js
+
     exit 0
 fi
 
