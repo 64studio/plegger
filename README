@@ -10,7 +10,7 @@ Or:
 
 1. Install dependencies manually. e.g. for Debian stretch which has node 4.7:
 
-sudo apt-get install sox libsox-fmt-mp3 dnsmasq hostapd nodejs
+sudo apt-get install sox libsox-fmt-mp3 dnsmasq hostapd nodejs wireless-tools
 
 2. Or on Debian before stretch, install nodejs from 4.x branch:
 
