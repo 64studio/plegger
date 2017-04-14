@@ -1,5 +1,7 @@
 #!/bin/sh
-set -e if [ "$1" = "purge" ] then
+set -e
+if [ "$1" = "purge" ] then
     # remove
+fi
 
 #DEBHELPER#
