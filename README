@@ -1,5 +1,6 @@
- The PiDeck Bootlegger is designed to record whenever audio is present on the default ALSA input device. It uses sox to record 192k MP3s and timestamp them. 
- These files are made available through a web browser interface on a local wireless network to anyone with the WiFi password, which can then be uploaded to a sharing service such as Mixcloud.
+The PiDeck Bootlegger is designed to record whenever audio is present on the default ALSA input device. It uses sox to record 192k MP3s and timestamp them. 
+
+These files are made available through a web browser interface on a local wireless network to anyone with the WiFi password, which can then be uploaded to a sharing service such as Mixcloud.
 
 Build with:
 
@@ -7,11 +8,11 @@ dpkg-buildpackage -aarmhf -I.git
 
 Or:
 
-1. Install dependencies manually:
+1. Install dependencies manually. e.g. for Debian stretch which has node 4.7:
 
-sudo apt-get install dnsmasq hostapd
+sudo apt-get install sox libsox-fmt-mp3 dnsmasq hostapd nodejs
 
-2. Install current nodejs from 4.x branch:
+2. Or on Debian before stretch, install nodejs from 4.x branch:
 
 curl -sL https://deb.nodesource.com/setup_4.x | sudo bash -
 sudo apt-get install -y nodejs
