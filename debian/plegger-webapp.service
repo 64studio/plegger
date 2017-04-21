@@ -1,0 +1,10 @@
+[Unit]
+Description="Webapp script"
+
+[Service]
+TimeoutStartSec=0
+ExecStart=/usr/share/plegger/plegger-webapp
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

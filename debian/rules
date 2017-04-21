@@ -3,9 +3,11 @@
 	dh $@ --with=systemd
 
 override_dh_installinit:
-	dh_systemd_enable -pplegger --name=plegger plegger.service
-	dh_installinit -pplegger --no-start --noscripts
-	dh_systemd_start -pplegger --no-restart-on-upgrade
+	dh_systemd_enable plegger-recorder.service
+	dh_systemd_enable plegger-webapp.service
+
+	#dh_systemd_start plegger-recorder.service
+	#dh_systemd_start plegger-webapp.service
 
 override_dh_systemd_start:
 	echo "Not running dh_systemd_start"

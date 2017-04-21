@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+echo "-------------------"
+echo "Hello from Plegger Webapp!"
+
+node /usr/share/plegger/webapp/src/server/webservice.js
