@@ -11,6 +11,10 @@ if [ "$1" = 'configure' ]; then
     #deb-systemd-invoke enable plegger
     #deb-systemd-invoke start plegger
 
+    # make the recordings directory
+    mkdir -p /home/pi/recordings
+    chown -R pi:pi /home/pi/recordings
+
     # add in symlink for nodejs
     ln -s /usr/bin/nodejs /usr/bin/node
 
