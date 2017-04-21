@@ -121,7 +121,7 @@
       const available_hubs = wifi_hubs.available_hubs;
       
       const select_el = document.getElementById("hubs_list");
-      for (const i = 0; i < available_hubs.length; ++i) {
+      for (let i = 0; i < available_hubs.length; ++i) {
         const option_el = document.createElement("option");
         option_el.innerHTML = available_hubs[i].name;
         select_el.append(option_el);
@@ -155,7 +155,7 @@
       
       let bdy = '';
       
-      for (const i = 0; i < files.length; ++i) {
+      for (let i = 0; i < files.length; ++i) {
         // Turn the result into a Date object,
         const file = files[i];
         const file_time = new Date(file.modtime);
@@ -198,12 +198,12 @@
       
       // After we've set the inner html, hook into the DOM,
       
-      for (const i = 0; i < files.length; ++i) {
+      for (let i = 0; i < files.length; ++i) {
         const key = 'aentry_' + i;
         const tr = document.getElementById(key);
         
         const children = tr.childNodes;
-        for (const n = 0; n < children.length; ++n) {
+        for (let n = 0; n < children.length; ++n) {
           const c = children[n];
           if (c.className === 'file_listen') {
             c.firstChild.addEventListener('click', function(evt) {
