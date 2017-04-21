@@ -3,4 +3,5 @@
 echo "-------------------"
 echo "Hello from Plegger Webapp!"
 
-node /usr/share/plegger/webapp/src/server/webservice.js
+cd /usr/share/plegger/webapp/
+node src/server/webservice.js

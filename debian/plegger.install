@@ -1,4 +1,6 @@
 plegger-recorder usr/share/plegger
+plegger-webapp usr/share/plegger
+first-time.sh usr/share/plegger
 webapp/* usr/share/plegger/webapp
 webapp/.babelrc usr/share/plegger/webapp
 conf/hostapd.conf etc/hostapd
