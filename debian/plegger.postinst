@@ -11,6 +11,9 @@ if [ "$1" = 'configure' ]; then
     #deb-systemd-invoke enable plegger
     #deb-systemd-invoke start plegger
 
+    # add in symlink for nodejs
+    ln -s /usr/bin/nodejs /usr/bin/node
+
     # remove the rainbow splash screen at bootup
     echo "disable_splash=1" >> /boot/config.txt
 
