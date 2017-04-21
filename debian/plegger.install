@@ -1,5 +1,6 @@
 plegger-recorder usr/share/plegger
 webapp/* usr/share/plegger/webapp
+weabpp/.babelrc usr/share/plegger/webapp
 conf/hostapd.conf etc/hostapd
 conf/dnsmasq.conf etc/dnsmasq.d
 conf/15-wlan0.network lib/systemd/network
