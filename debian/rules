@@ -2,12 +2,14 @@
 %:
 	dh $@ --with=systemd
 
-override_dh_installinit:
-	dh_systemd_enable plegger-recorder.service
-	dh_systemd_enable plegger-webapp.service
+override_dh_systemd_enable:
+	dh_systemd_enable plegger.recorder.service
+	dh_systemd_enable plegger.webapp.service
 
-	#dh_systemd_start plegger-recorder.service
-	#dh_systemd_start plegger-webapp.service
+override_dh_installinit:
+	dh_installinit --name=recorder
+	dh_installinit --name=webapp
 
 override_dh_systemd_start:
-	echo "Not running dh_systemd_start"
+	dh_systemd_start plegger.recorder.service
+	dh_systemd_start plegger.webapp.service

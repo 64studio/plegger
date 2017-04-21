@@ -8,9 +8,9 @@ if [ "$1" = 'configure' ]; then
     deb-systemd-invoke enable hostapd
     deb-systemd-invoke start hostapd
     # Install and start recording daemon
-    deb-systemd-invoke enable plegger
-    deb-systemd-invoke start plegger
-    
+    #deb-systemd-invoke enable plegger
+    #deb-systemd-invoke start plegger
+
     # remove the rainbow splash screen at bootup
     echo "disable_splash=1" >> /boot/config.txt
 
