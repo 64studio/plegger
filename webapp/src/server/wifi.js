@@ -175,10 +175,20 @@ module.exports = function(net_interface) {
     });
   }
 
+  // Bring the network interface up,
   function up(callback) {
+    // Spawn the Linux command asynchronously,
+    const up_cmd = spawnLinuxProcess('ip', [ 'link', 'set', net_interface, 'up' ], (fulloutput) => {
+      callback( { status:'%SUCCESS:Interface up' } );
+    });
   }
 
+  // Bring the network interface down,
   function down(callback) {
+    // Spawn the Linux command asynchronously,
+    const up_cmd = spawnLinuxProcess('ip', [ 'link', 'set', net_interface, 'down' ], (fulloutput) => {
+      callback( { status:'%SUCCESS:Interface down' } );
+    });
   }
 
   const CONNECT_P = net_interface + ": CTRL-EVENT-CONNECTED ";
