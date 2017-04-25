@@ -27,7 +27,7 @@ module.exports = function(net_interface) {
 
   // Details about the current wpa process,
   let current_wpa_details = {};
-  
+
 
 
 
@@ -72,7 +72,7 @@ module.exports = function(net_interface) {
   function sanitiseEssidString(essid) {
     return essid.trim().replace(/(\r\n|\n|\r)/gm, "");
   }
-  
+
   // Sanitise the passphrase.
   function sanitisePassphrase(passphrase) {
     // Remove all quotes from passphrase,
@@ -92,7 +92,9 @@ module.exports = function(net_interface) {
     });
     return p;
   }
-  
+
+  // Calls 'on_line_function' for each line in the string 'text'. Once finished,
+  // calls 'complete_function'.
   function onLine(text, on_line_function, complete_function) {
     const rstream = new Readable();
     rstream.push(text);
@@ -101,17 +103,17 @@ module.exports = function(net_interface) {
     lineReader.on('line', on_line_function);
     lineReader.on('close', complete_function);
   }
-  
+
   function notifyCurrentConnected() {
     current_wpa_details.connected = true;
     console.log("Connect: ", current_wpa_details);
   }
-  
+
   function notifyCurrentDisconnected() {
     current_wpa_details.connected = false;
     console.log("Disconnect: ", current_wpa_details);
   }
-  
+
   // Runs the Linux command;
   //   'iwlist [interface] scan'
   // This will generate a list of all available local wifi spots.
@@ -214,7 +216,7 @@ module.exports = function(net_interface) {
           // the first part of the line.
           // Better solution would be to parse the output completely than look at this
           // substring.
-          
+
           if (line.startsWith(CONNECT_P)) {
             notifyCurrentConnected();
           }
@@ -245,7 +247,7 @@ module.exports = function(net_interface) {
           console.trace("Unable to write file: ", last_connect_filename);
         }
       });
-      
+
       callback( { status: '%SUCCESS:Connection established', essid:essid } );
 
     }
@@ -260,7 +262,7 @@ module.exports = function(net_interface) {
     }
 
   }
-  
+
   // Returns information about the WiFi currently connected to, or null if not
   // connected to WiFi. The object contains the following information;
   //
@@ -306,7 +308,7 @@ module.exports = function(net_interface) {
   //
   // Will NOT connect to a network unless the user has specifically tried to
   // connect to it in the past, and hasn't chosen to 'forget' it.
-  
+
   function autoConnect(callback) {
 
     // Scan for available wifi,
@@ -329,7 +331,7 @@ module.exports = function(net_interface) {
               ++i;
 
               const essid = cell.essid;
-              
+
               // Hash the essid name,
               const hash_name = sha256Hash(essid, (hashcode) => {
 
@@ -370,7 +372,7 @@ module.exports = function(net_interface) {
             // file,
             findAutoConnectWifi();
           }
-          
+
           // Connect to this one,
           // Hash the essid name,
           const hash_name = sha256Hash(essid, (hashcode) => {
@@ -406,7 +408,7 @@ module.exports = function(net_interface) {
           }
 
           autoConnectTo(last_connect_essid);
-          
+
         });
 
       }
@@ -420,7 +422,7 @@ module.exports = function(net_interface) {
   // Connect to the given essid with passphrase and call 'callback' when
   // complete.
   function connect(essid, passphrase, callback) {
-    
+
     // Scan for wifi that matches essid
     scan( (result, err) => {
 
@@ -441,12 +443,12 @@ module.exports = function(net_interface) {
 
         // Hash the essid name,
         const hash_name = sha256Hash(essid, (hashcode) => {
-          
+
           // The configuration file for this network,
           const conf_filename = BASE_VAR_LIB_PATH + hashcode + '.conf';
-          
+
           const sanitised_essid = sanitiseEssidString( essid );
-          
+
           // Is it an open hotspot?
           if (matching_spot.encryption === 'off') {
             if (passphrase !== null) {
@@ -520,10 +522,10 @@ module.exports = function(net_interface) {
       callback ( { status: '%SUCCESS:Disconnected' } );
     }
   }
-  
+
   // Forget the given essid information and call 'callback' when complete.
   function forget(essid, callback) {
-    
+
     // Hash the essid name,
     const hash_name = sha256Hash(essid, (hashcode) => {
       // The configuration file for this network,
@@ -531,9 +533,9 @@ module.exports = function(net_interface) {
       // Delete it if it exists. This forces reauthentication.
       fs.unlink(conf_filename);
     });
-    
+
     callback( { status: '%SUCCESS:Essid forgot' } );
-    
+
   }
 
 
