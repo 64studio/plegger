@@ -11,8 +11,9 @@ const crypto = require('crypto');
 const hash = crypto.createHash('sha256');
 
 
-// PENDING: Turn this into a configuration property,
+// PENDING: Turn this into configuration properties,
 const BASE_VAR_LIB_PATH = '/var/lib/plegger/';
+const LAST_ESSID_FILE = 'last_essid_connect';
 
 
 
@@ -228,7 +229,7 @@ module.exports = function(net_interface) {
       });
 
       // Write this essid to a file,
-      const last_connect_filename = BASE_VAR_LIB_PATH + 'last_essid_connect';
+      const last_connect_filename = BASE_VAR_LIB_PATH + LAST_ESSID_FILE;
       fs.writeFile( last_connect_filename, essid, (err) => {
         if (err) {
           console.trace("Unable to write file: ", last_connect_filename);
@@ -383,7 +384,7 @@ module.exports = function(net_interface) {
         }
 
         // Is there a previously connected file?
-        const last_connect_filename = BASE_VAR_LIB_PATH + 'last_essid_connect';
+        const last_connect_filename = BASE_VAR_LIB_PATH + LAST_ESSID_FILE;
         fs.readFile(last_connect_filename, (err, data) => {
           let last_connect_essid;
           if (err) {
