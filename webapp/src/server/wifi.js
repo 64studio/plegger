@@ -3,7 +3,9 @@
 const spawn = require('child_process').spawn;
 const Readable = require('stream').Readable;
 const readline = require('readline');
+const EventEmitter = require('events').EventEmitter;
 
+const util = require('util');
 const fs = require('fs');
 
 // For hashing the essid name into unique file name,
@@ -98,12 +100,16 @@ module.exports = function(net_interface) {
 
   function notifyCurrentConnected() {
     current_wpa_details.connected = true;
-    console.log("Connect: ", current_wpa_details);
+    // Emit event when WPA tells us the wifi is connected,
+    out.emit('connect', current_wpa_details);
   }
 
   function notifyCurrentDisconnected() {
     current_wpa_details.connected = false;
-    console.log("Disconnect: ", current_wpa_details);
+    // Emit event when WPA tells us the wifi is disconnected,
+    // This can happen for various reasons such as when WiFi switched off
+    // or signal interference. It can be temporary or permanent.
+    out.emit('disconnect', current_wpa_details);
   }
 
   // Runs the Linux command;
@@ -531,40 +537,42 @@ module.exports = function(net_interface) {
 
   }
 
+  // Exported API,
 
+  class WiFi extends EventEmitter {}
+  const out = new WiFi();
 
-  return {
-    // scan(callback)
-    //   Returns a list of local networks that are available to be
-    //   connected to.
-    scan,
+  // scan(callback)
+  //   Returns a list of local networks that are available to be
+  //   connected to.
+  out.scan = scan;
 
-    //   Bring the network interface up.
-    up,
+  //   Bring the network interface up.
+  out.up = up;
 
-    //   Bring the network interface down.
-    down,
+  //   Bring the network interface down.
+  out.down = down;
 
-    // autoConnect(callback)
-    //   Try to auto connect to a network that was previously
-    //   connected to. If there's a choice of networks, picks
-    //   the network with the strongest signal.
-    autoConnect,
+  // autoConnect(callback)
+  //   Try to auto connect to a network that was previously
+  //   connected to. If there's a choice of networks, picks
+  //   the network with the strongest signal.
+  out.autoConnect = autoConnect;
 
-    // connect(essid, passphrase, callback)
-    //   Authenticate a connection with a WiFi network.
-    connect,
+  // connect(essid, passphrase, callback)
+  //   Authenticate a connection with a WiFi network.
+  out.connect = connect;
 
-    // disconnect(callback)
-    //   Disconnect from a WiFi network. The device will stay
-    //   disconnected until a new connection is established either
-    //   with 'autoConnect' or 'connect'.
-    disconnect,
+  // disconnect(callback)
+  //   Disconnect from a WiFi network. The device will stay
+  //   disconnected until a new connection is established either
+  //   with 'autoConnect' or 'connect'.
+  out.disconnect = disconnect;
 
-    // forget(essid, callback)
-    //   Forget a previously connected to network.
-    forget,
+  // forget(essid, callback)
+  //   Forget a previously connected to network.
+  out.forget = forget;
 
-  };
+  return out;
 
 }
