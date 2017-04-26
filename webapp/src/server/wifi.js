@@ -8,7 +8,6 @@ const fs = require('fs');
 
 // For hashing the essid name into unique file name,
 const crypto = require('crypto');
-const hash = crypto.createHash('sha256');
 
 
 // PENDING: Turn this into configuration properties,
@@ -32,14 +31,6 @@ module.exports = function(net_interface) {
 
 
 
-  // Parses an ESSID string from the Linux iwlist and coverts it into a
-  // JavaScript form that is displayable to the user.
-  function parseLinuxESSID(linux_essid) {
-    linux_essid.trim();
-    // Remove the outer quotes of the essid string,
-    return linux_essid.substring(1, linux_essid.length - 1);
-  }
-
   function parseSignalStrength(quality, signal) {
     const qual_re = /(\w+)\/(\w+)/;
     const m = quality.match(qual_re);
@@ -52,6 +43,7 @@ module.exports = function(net_interface) {
   }
 
   function sha256Hash(str, callback) {
+    const hash = crypto.createHash('sha256');
     hash.on('readable', () => {
       const data = hash.read();
       if (data) {
@@ -333,7 +325,7 @@ module.exports = function(net_interface) {
               const essid = cell.essid;
 
               // Hash the essid name,
-              const hash_name = sha256Hash(essid, (hashcode) => {
+              sha256Hash(essid, (hashcode) => {
 
                 // The configuration file for this network,
                 const conf_filename = BASE_VAR_LIB_PATH + hashcode + '.conf';
@@ -372,42 +364,42 @@ module.exports = function(net_interface) {
             // file,
             findAutoConnectWifi();
           }
+          else {
 
-          // Connect to this one,
-          // Hash the essid name,
-          const hash_name = sha256Hash(essid, (hashcode) => {
+            // Connect to this one,
+            // Hash the essid name,
+            sha256Hash(essid, (hashcode) => {
 
-            // The configuration file for this network,
-            const conf_filename = BASE_VAR_LIB_PATH + hashcode + '.conf';
-            // Does it exist?
-            fs.stat(conf_filename, (err, stat) => {
-              if (err === null) {
-                // Config file exists, so use it for wpa_supplicant,
-                tryToConnectWPA(essid, conf_filename, callback);
-              }
-              else {
-                // File doesn't exist so fall back to global scan,
-                findAutoConnectWifi();
-              }
+              // The configuration file for this network,
+              const conf_filename = BASE_VAR_LIB_PATH + hashcode + '.conf';
+              // Does it exist?
+              fs.stat(conf_filename, (err, stat) => {
+                if (err === null) {
+                  // Config file exists, so use it for wpa_supplicant,
+                  tryToConnectWPA(essid, conf_filename, callback);
+                }
+                else {
+                  // File doesn't exist so fall back to global scan,
+                  findAutoConnectWifi();
+                }
+              });
+
             });
 
-          });
+          }
 
         }
 
         // Is there a previously connected file?
         const last_connect_filename = BASE_VAR_LIB_PATH + LAST_ESSID_FILE;
         fs.readFile(last_connect_filename, (err, data) => {
-          let last_connect_essid;
           if (err) {
             // Probably file doesn't exist. This is fine,
-            last_connect_essid = null;
+            findAutoConnectWifi();
           }
           else {
-            last_connect_essid = data.toString();
+            autoConnectTo(data.toString());
           }
-
-          autoConnectTo(last_connect_essid);
 
         });
 
@@ -442,7 +434,7 @@ module.exports = function(net_interface) {
         }
 
         // Hash the essid name,
-        const hash_name = sha256Hash(essid, (hashcode) => {
+        sha256Hash(essid, (hashcode) => {
 
           // The configuration file for this network,
           const conf_filename = BASE_VAR_LIB_PATH + hashcode + '.conf';
@@ -472,10 +464,11 @@ module.exports = function(net_interface) {
             // Write a new WPA config file,
             const sanitised_passphrase = sanitisePassphrase( passphrase );
 
+            // Generate the wpa_supplicant config file using the 'wpa_passphrase' linux command.
             const wpa_passph = spawnLinuxProcess('wpa_passphrase',
                   [ sanitised_essid, sanitised_passphrase ], (fulloutput) => {
 
-              // Create a wpa config for this network,
+              // Write out the config file content,
               fs.writeFile( conf_filename, fulloutput, (err) => {
                 if (err) {
                   callback( { status: '%FS_ERROR:Unable to write wpa_supplicant config file' } );
@@ -527,7 +520,7 @@ module.exports = function(net_interface) {
   function forget(essid, callback) {
 
     // Hash the essid name,
-    const hash_name = sha256Hash(essid, (hashcode) => {
+    sha256Hash(essid, (hashcode) => {
       // The configuration file for this network,
       const conf_filename = BASE_VAR_LIB_PATH + hashcode + '.conf';
       // Delete it if it exists. This forces reauthentication.
