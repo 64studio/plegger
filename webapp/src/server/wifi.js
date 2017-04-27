@@ -17,6 +17,11 @@ const BASE_VAR_LIB_PATH = '/var/lib/plegger/';
 const LAST_ESSID_FILE = 'last_essid_connect';
 
 
+// Wifi is created with the network interface to use as the argument.
+// For example;
+//
+//   const Wifi = require('./wifi');
+//   const connection = Wifi('wlan1');
 
 module.exports = function(net_interface) {
 
