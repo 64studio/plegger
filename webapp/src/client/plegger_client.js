@@ -185,7 +185,8 @@
         bdy += '<td class="file_day_hour">' + dayhour + '</td>\n';
         bdy += '<td class="file_size">' + size + '</td>\n';
         bdy += '<td class="file_listen"><a href="#"><img src="assets/headphones.svg" width="20"></a></td>\n';
-        bdy += '<td class="file_download"><a href="#"><img src="assets/arrow-circle-top.svg" width="20"></a></td>\n';
+        bdy += '<td class="file_upload"><a href="#"><img src="assets/arrow-circle-top.svg" width="20"></a></td>\n';
+        bdy += '<td class="file_download"><a href="#"><img src="assets/arrow-circle-bottom.svg" width="20"></a></td>\n';
         bdy += '</tr>\n';
         
       }
