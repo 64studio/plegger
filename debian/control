@@ -8,7 +8,7 @@ Standards-Version: 3.9.8
 Package: plegger
 Architecture: all
 Pre-Depends: dnsmasq, hostapd
-Depends: libsox-fmt-alsa, libsox-fmt-mp3, sox, nodejs (>= 4.7), npm, wireless-tools, ifmetric, firmware-atheros, firmware-realtek, wpasupplicant, ${misc:Depends}
+Depends: libsox-fmt-alsa, libsox-fmt-mp3, sox, nodejs (>= 4.7), npm, wireless-tools, ifmetric, firmware-atheros, firmware-realtek, wpasupplicant, psmisc, ${misc:Depends}
 Description: PiDeck Bootlegger
  The PiDeck Bootlegger is designed to record whenever audio is present on the 
  default ALSA input device. It uses sox to record 192k MP3s and timestamp them. 
