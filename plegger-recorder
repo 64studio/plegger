@@ -11,10 +11,10 @@ REC_PATH="/home/pi/recordings"
 THRESHOLD=1%
 
 # set the duration of sound before recording starts
-START_DELAY=0
+START_DELAY=0.1
 
 # set the duration of silence before recording ends
-END_DELAY=5.0
+END_DELAY=0.1
 
 # set ALSA as the recording mode for sox
 export AUDIODRIVER=alsa
@@ -28,9 +28,15 @@ export AUDIODEV=hw:0
 echo "-------------------"
 echo "Hello from Plegger Recorder!"
 
-echo "Recording "$(date +"%Y-%m-%d_%H-%M-%S").mp3
+FILE=$REC_PATH/$(date +"%Y-%m-%d_%H-%M-%S")
+INPUT_FILE=$FILE.flac
+PROCESSED_FILE=$FILE.mp3
 
-rec -r 44100 -C 192 -c 2 $REC_PATH/$(date +"%Y-%m-%d_%H-%M-%S").mp3 silence 1 $START_DELAY $THRESHOLD 1 $END_DELAY $THRESHOLD
+echo "Recording $INPUT_FILE"
+rec -r 44100 -c 2 $INPUT_FILE || exit 1
+
+echo "Trimming silence from beginning & end of file & re-encoding to MP3"
+sox $INPUT_FILE -C 192 $PROCESSED_FILE silence 1 $START_DELAY $THRESHOLD reverse silence 1 $END_DELAY $THRESHOLD reverse &
 
 echo "I quit!"
 
