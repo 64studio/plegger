@@ -8,20 +8,54 @@
   const pleg_api = require('./pleg_api');
 
   // Locale specific date formatters,
-  let preferred_locale = window.navigator.language;
-  let dayOfWeekFormatter = new Intl.DateTimeFormat( preferred_locale, { weekday: 'long' });
-  let monthOfYearFormatter = new Intl.DateTimeFormat( preferred_locale, { month: 'long' });
-  let yearFormatter = new Intl.DateTimeFormat( preferred_locale, { year: 'numeric' });
+  const preferred_locale = window.navigator.language;
+  let monthOfYearFormatter;
+  let yearFormatter;
+  let fileEntryFormatter;
 
-  let fileEntryFormatter = new Intl.DateTimeFormat( preferred_locale,
-            { weekday: 'long', month:'short', day:'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' });
+  // Formatter using Intl library.
+  // Disabled for now because most browsers don't support this.
+  // PENDING: Use a polyfill to support this over all browsers?
+  if (false) {
+    monthOfYearFormatter = new Intl.DateTimeFormat( preferred_locale, { month: 'long' });
+    yearFormatter = new Intl.DateTimeFormat( preferred_locale, { year: 'numeric' });
+
+    fileEntryFormatter = new Intl.DateTimeFormat( preferred_locale,
+              { weekday: 'long', month:'short', day:'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' });
+  }
+  // None locale version,
+  else {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const shortMonths = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    const daysOfWeek = [
+      'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
+    ];
+    
+    monthOfYearFormatter = {};
+    monthOfYearFormatter.format = (date) => {
+      return months[date.getMonth()];
+    };
+    yearFormatter = {};
+    yearFormatter.format = (date) => {
+      return date.getFullYear().toString();
+    };
+    fileEntryFormatter = {};
+    fileEntryFormatter.format = (date) => {
+      return daysOfWeek[date.getDay()] + ", " + date.getDate() + " " + shortMonths[date.getMonth()] + ", " + date.toLocaleTimeString();
+    };
+  }
+
+
 
   // This is the DOM element to change when switching between views,
   let uibody_el;
 
   // The current UI state,
   var ui_state = 'file';
-  
 
   
   // Called when the 'listen' icon is selected.
