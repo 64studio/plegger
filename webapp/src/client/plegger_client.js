@@ -270,8 +270,8 @@
     const main_div_el = document.getElementById("main");
 
     const header_html = 
-      '<img class="logo" src="assets/recorder-logo-blue.svg">\n' +
-      '<a id="settings_aref" href="#"><img class="settings" src="assets/wrench.svg"></a>\n';
+      '<img class="logo" src="assets/recorder-logo-blue.svg"><br/>\n' +
+      '<a id="settings_aref" href="#"><img class="settings" src="assets/wrench.svg"></a>\n<br/>\n';
     
     const footer_html = '';
     
