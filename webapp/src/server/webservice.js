@@ -9,6 +9,8 @@ var bodyParser = require('body-parser');
 var serverApi = require('./server_api');
 var serverDl = require('./server_dl');
 
+var wifiManager = require('./wifi');
+
 var app = express();
 
 // Install some middleware components,
@@ -34,9 +36,16 @@ app.use( function(req, res, next) {
   }
 });
 
+// Create the wifi object,
+var wifi = wifiManager( config.internet_wireless_interface );
+
+// The plegger service API object with wifi,
+var plegger_service_api = serverApi( wifi );
+
+
 // The dynamic URIs,
 //app.get('/serv/api', bb_server_api);
-app.post('/serv/api', serverApi());
+app.post('/serv/api', plegger_service_api);
 app.get('/serv/play/:filename', serverDl.player);
 app.get('/serv/dl/:filename', serverDl.downloader);
 
@@ -48,3 +57,8 @@ var http_port = config.http_port;
 app.listen(http_port, function () {
   console.log('Service started on port ' + http_port);
 });
+
+
+
+
+
