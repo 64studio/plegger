@@ -2,7 +2,7 @@
 
 var fs = require('fs');
 
-var config = require('../../bbconfig.json');
+var config = require('../../bbconfig.js');
 
 // The Node Express request handler for the server side API,
 

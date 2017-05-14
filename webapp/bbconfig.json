@@ -1,8 +1,0 @@
-{
-  "http_port":80,
-  "__http_port":8000,
-  "landing_host":"hw.plegger",
-  "__landing_host":"localhost:8000",
-
-  "recordings_path":"/home/pi/recordings"
-}

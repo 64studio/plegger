@@ -1,5 +1,7 @@
 "use strict";
 
+const config = require('../../bbconfig.js');
+
 const spawn = require('child_process').spawn;
 const Readable = require('stream').Readable;
 const readline = require('readline');
@@ -11,9 +13,8 @@ const fs = require('fs');
 // For hashing the essid name into unique file name,
 const crypto = require('crypto');
 
-
-// PENDING: Turn this into configuration properties,
-const BASE_VAR_LIB_PATH = '/var/lib/plegger/';
+// Base storage path from configuration,
+const BASE_VAR_LIB_PATH = config.BASE_VAR_LIB_PATH;
 const LAST_ESSID_FILE = 'last_essid_connect';
 
 

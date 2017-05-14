@@ -2,7 +2,7 @@
 
 // Node.js HTTP service for the blue box UI.
 
-var config = require('../../bbconfig.json');
+var config = require('../../bbconfig');
 
 var express = require('express');
 var bodyParser = require('body-parser');
