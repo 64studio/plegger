@@ -72,8 +72,21 @@ function getFileList(sort_order, callback) {
   
 }
 
+function connectToWireless(essid, passphrase, callback) {
+  
+  const args = {
+    essid,
+    passphrase
+  }
+  
+  query('connectToWireless', args, callback);
+  
+}
+
+
 module.exports = {
   getFileList,
+  connectToWireless,
   getWiFiInfo,
   getWiFiAvailableHubs
 };

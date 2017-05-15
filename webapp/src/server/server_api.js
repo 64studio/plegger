@@ -53,15 +53,26 @@ module.exports = function( wifi ) {
   // Returns current wifi information,
   server_commands.getWiFiInfo = function(args, req, res) {
 
-    // Query the operating system and fetch the following info,
-
     // Current connection. This should be cached info that's updated
     // every few seconds,
-    var result = {
-      network_name: 'Test Wifi Hub',
-      security:     'key',
-      strength:     7
-    };
+    var connect_info = wifi.getWiFiConnectionInfo();
+    var result;
+    if (connect_info !== null) {
+      result = {
+        network_name: connect_info.essid,
+        security:     connect_info.security,
+        strength:     connect_info.strength
+      };
+    }
+    else {
+      result = {
+        network_name: '',
+        security:     '',
+        strength:     10
+      };
+    }
+  
+  
 
     completeResponse(result, res);
 
@@ -113,6 +124,25 @@ module.exports = function( wifi ) {
 
   }
 
+
+  server_commands.connectToWireless = function(args, req, res) {
+
+    // The essid and passphrase entered on the client,
+    var essid = args.essid;
+    var passphrase = args.passphrase;
+
+    // Try to connect to WiFi essid,
+    wifi.connect(essid, passphrase, function(result, err) {
+      if (err === void 0) {
+        completeResponse(result, res);
+      }
+      else {
+        completeResponseError(err, res);
+      }
+    });
+
+  };
+  
 
 
   // Returns the list of music files from the recording directory,

@@ -203,13 +203,15 @@ module.exports = function(net_interface) {
   // Try to connect to the WiFi hotspot via wpa_supplicant. If a connection is already
   // established, issue a 'kill' on the existing process, then on close establish
   // connection with the WiFi network.
-  function tryToConnectWPA(essid, filename, callback) {
+  function tryToConnectWPA(essid, security, filename, callback) {
 
     function establishConnection() {
       // wpa_supplicant -i wlan1 -c wifi.conf
       wpa_supplicant_process = spawn( 'wpa_supplicant', [ '-i', net_interface, '-c', filename ] );
       current_wpa_details = {
         essid: essid,
+        security: security,
+        strength: 10,
         connected: false
       };
       wpa_supplicant_process.stdout.on('data', (data) => {
@@ -274,6 +276,9 @@ module.exports = function(net_interface) {
   //   Current Status (connected or not)
 
   function getWiFiConnectionInfo() {
+    if (current_wpa_details === null || current_wpa_details === void 0) {
+      return null;
+    }
     // Clone the wpa details object.
     // PENDING: Do we need a more efficient clone for this?
     return JSON.parse( JSON.stringify( current_wpa_details ) );
@@ -335,6 +340,8 @@ module.exports = function(net_interface) {
               ++i;
 
               const essid = cell.essid;
+              const security = ( cell.encryption === 'on' ) ? 'key' : 'open';
+              const strength = cell.strength;
 
               // Hash the essid name,
               sha256Hash(essid, (hashcode) => {
@@ -345,7 +352,7 @@ module.exports = function(net_interface) {
                 fs.stat(conf_filename, (err, stat) => {
                   if (err === null) {
                     // Config file exists, so use it for wpa_supplicant,
-                    tryToConnectWPA(essid, conf_filename, callback);
+                    tryToConnectWPA(essid, security, conf_filename, callback);
                   }
                   else {
                     // File doesn't exist so go to next essid in scan,
@@ -378,6 +385,9 @@ module.exports = function(net_interface) {
           }
           else {
 
+            const security = ( matching_cell.encryption === 'on' ) ? 'key' : 'open';
+            const strength = matching_cell.strength;
+
             // Connect to this one,
             // Hash the essid name,
             sha256Hash(essid, (hashcode) => {
@@ -387,8 +397,9 @@ module.exports = function(net_interface) {
               // Does it exist?
               fs.stat(conf_filename, (err, stat) => {
                 if (err === null) {
+
                   // Config file exists, so use it for wpa_supplicant,
-                  tryToConnectWPA(essid, conf_filename, callback);
+                  tryToConnectWPA(essid, security, conf_filename, callback);
                 }
                 else {
                   // File doesn't exist so fall back to global scan,
@@ -427,6 +438,8 @@ module.exports = function(net_interface) {
   // complete.
   function connect(essid, passphrase, callback) {
 
+    console.log("WIFI: Connect to %s pass: %s", essid, passphrase);
+  
     // Scan for wifi that matches essid
     scan( (result, err) => {
 
@@ -453,8 +466,11 @@ module.exports = function(net_interface) {
 
           const sanitised_essid = sanitiseEssidString( essid );
 
+          const security = ( matching_spot.encryption === 'on' ) ? 'key' : 'open';
+          const strength = matching_spot.strength;
+
           // Is it an open hotspot?
-          if (matching_spot.encryption === 'off') {
+          if (security === 'open') {
             if (passphrase !== null) {
               callback( { status: '%OPEN_WIFI:Essid is an open wifi network, passphrase not required' } );
             }
@@ -467,7 +483,7 @@ module.exports = function(net_interface) {
                 }
                 else {
                   // File successfully written, so now try to connect,
-                  tryToConnectWPA(sanitised_essid, conf_filename, callback);
+                  tryToConnectWPA(sanitised_essid, security, conf_filename, callback);
                 }
               });
             }
@@ -487,7 +503,7 @@ module.exports = function(net_interface) {
                 }
                 else {
                   // File successfully written, so now try to connect,
-                  tryToConnectWPA(sanitised_essid, conf_filename, callback);
+                  tryToConnectWPA(sanitised_essid, security, conf_filename, callback);
                 }
               });
 
@@ -547,6 +563,11 @@ module.exports = function(net_interface) {
 
   class WiFi extends EventEmitter {}
   const out = new WiFi();
+
+  // getWiFiConnectionInfo
+  //   Returns an object returning the current connection (or null if
+  //   no connection).
+  out.getWiFiConnectionInfo = getWiFiConnectionInfo;
 
   // scan(callback)
   //   Returns a list of local networks that are available to be

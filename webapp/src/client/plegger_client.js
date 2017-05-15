@@ -4,7 +4,7 @@
 (function() {
 
   const prettyBytes = require('pretty-bytes');
-  
+
   const pleg_api = require('./pleg_api');
 
   // Locale specific date formatters,
@@ -34,7 +34,7 @@
     const daysOfWeek = [
       'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
     ];
-    
+
     monthOfYearFormatter = {};
     monthOfYearFormatter.format = (date) => {
       return months[date.getMonth()];
@@ -57,7 +57,7 @@
   // The current UI state,
   var ui_state = 'file';
 
-  
+
   // Called when the 'listen' icon is selected.
   //   'file' is the file object to listen to,
   //   'el' is the DOM element (for UI effects),
@@ -68,23 +68,23 @@
     window.location = 'serv/play/' + file.file;
 
   }
-  
+
   // Called when the 'download' icon is selected.
   //   'file' is the file object to listen to,
   //   'el' is the DOM element (for UI effects),
   function onFileDownloadClick(evt, file, el, i) {
     console.log("Download file: ", file, el);
-    
+
     // The forces the client to download by using attachment HTTP header,
     window.location = 'serv/dl/' + file.file;
-    
+
   }
 
   // Called when the 'settings' icon is clicked on the UI. This should toggle
   // between the wifi setup and the file list,
   function onSettingsClick(evt) {
     console.log("Settings click!");
-    
+
     if (ui_state === 'file') {
       ui_state = 'wifi';
       presentWiFi();
@@ -96,18 +96,19 @@
     else {
       console.error("Invalid UI State: " + ui_state);
     }
-    
+
   }
-  
-  
+
+
   // Present the WiFi configuration UI,
   function presentWiFi() {
     // Clear the UI body,
-    uibody_el.innerHTML = '<form><div id="wifi_current"></div><div id="wifi_external"></div></form>';
-    
+    uibody_el.innerHTML = '<form><div id="wifi_current"></div><div id="wifi_external"></div><div id="wifi_connect"></div></form>';
+
     const wifi_current_el = document.getElementById('wifi_current');
     const wifi_external_el = document.getElementById('wifi_external');
-    
+    const wifi_connect_el = document.getElementById('wifi_connect');
+
     // Query the current wifi state,
     pleg_api.getWiFiInfo( (error, wifi_info) => {
       if (error) {
@@ -117,11 +118,11 @@
       console.log(wifi_info);
 
       let bdy = '';
-      
+
       bdy += '<table class="settings settings_current">\n';
 
       bdy += '<tr><td>Connected To:</td>\n';
-      bdy += '<td><input id="connect_network_name" type="text" size="30"></td>\n';
+      bdy += '<td id="connect_network_name"></td>\n';
       bdy += '</tr>\n';
       bdy += '<tr><td>Strength:</td>\n';
       bdy += '<td>' + wifi_info.strength + '</td>\n';
@@ -130,8 +131,8 @@
 
       wifi_current_el.innerHTML = bdy;
 
-      document.getElementById("connect_network_name").value = wifi_info.network_name;
-      
+      document.getElementById("connect_network_name").textContent = wifi_info.network_name;
+
     });
 
     pleg_api.getWiFiAvailableHubs( (error, wifi_hubs) => {
@@ -142,7 +143,7 @@
       console.log(wifi_hubs);
 
       let bdy = '';
-      
+
       bdy += '<table class="settings settings_hubs">\n';
 
       bdy += '<tr><td>Access Points</td>\n';
@@ -153,22 +154,74 @@
       wifi_external_el.innerHTML = bdy;
 
       const available_hubs = wifi_hubs.available_hubs;
-      
+
       const select_el = document.getElementById("hubs_list");
       for (let i = 0; i < available_hubs.length; ++i) {
         const option_el = document.createElement("option");
         option_el.innerHTML = available_hubs[i].name;
         select_el.append(option_el);
       }
-      
-      
+
+      select_el.onchange = function() {
+        const selected_index = select_el.selectedIndex;
+        const hub = available_hubs[selected_index];
+
+        const name = hub.name;
+        const security = hub.security;
+        const strength = hub.strength;
+
+        // When we select, we change the UI so it provides a connect dialog,
+
+        let bdy = '';
+        bdy += '<table class="settings settings_connect">\n';
+        bdy += '<tr><td>Connect To</td><td id="connect_to"></td></tr>\n';
+        if (security === 'key') {
+          bdy += '<tr><td>Password</td><td><input id="password_input" type="password" /></td></tr>';
+        }
+        bdy += '<tr><td></td><td><input id="connect_btn" type="button" value="Connect" /></td></tr>\n';
+        bdy += '</table>\n';
+        
+        wifi_connect_el.innerHTML = bdy;
+        
+        const connect_to_el = document.getElementById("connect_to");
+        let password_input_el;
+        if (security === 'key') password_input_el = document.getElementById("password_input");
+        const connect_btn_el = document.getElementById("connect_btn");
+
+        // Set the ESSID in the UI,
+        connect_to_el.textContent = name;
+        // Action,
+        connect_btn_el.onclick = function() {
+          let passphrase = undefined;
+          if (password_input_el) {
+            passphrase = password_input_el.value;
+          }
+          tryWiFiConnect(name, passphrase);
+        };
+
+      }
 
     });
-    
+
 
   }
+
   
+  function tryWiFiConnect(essid, passphrase) {
+    // Send command to server to try and connect to this wifi,
+    pleg_api.connectToWireless( essid, passphrase, (error, result) => {
+      if (error) {
+        console.error(error);
+      }
+      else {
+        console.log("Connection responded: ", result);
+      }
+    });
+    
+    console.log("Try CONNECT: ", essid, passphrase);
+  }
   
+
   // Present the file list UI,
   function presentFileList() {
     // Clear the UI body,
@@ -179,16 +232,16 @@
       if (error) {
         throw error;
       }
-      
+
       // The files list from the query,
       const files = all_files.files;
 
       // Format it into a nice list,
-      
+
       var current_month_year = '';
-      
+
       let bdy = '';
-      
+
       for (let i = 0; i < files.length; ++i) {
         // Turn the result into a Date object,
         const file = files[i];
@@ -200,7 +253,7 @@
         const year = yearFormatter.format(file_time);
 
         const file_month_year = month + " " + year;
-        
+
         if (current_month_year !== file_month_year) {
           // Close out the last group,
           if (current_month_year !== '') {
@@ -211,7 +264,7 @@
           bdy += '<th colspan="2">' + file_month_year + '</th>\n';
           current_month_year = file_month_year;
         }
-        
+
         // The file details,
         const dayhour = fileEntryFormatter.format(file_time);
         const size = prettyBytes(file.size);
@@ -222,21 +275,21 @@
         bdy += '<td class="file_upload"><a href="#"><img src="assets/arrow-circle-top.svg" width="20"></a></td>\n';
         bdy += '<td class="file_download"><a href="#"><img src="assets/arrow-circle-bottom.svg" width="20"></a></td>\n';
         bdy += '</tr>\n';
-        
+
       }
-      
+
       if (current_month_year !== '') {
         bdy += '</table>\n';
       }
-      
+
       uibody_el.innerHTML = bdy;
-      
+
       // After we've set the inner html, hook into the DOM,
-      
+
       for (let i = 0; i < files.length; ++i) {
         const key = 'aentry_' + i;
         const tr = document.getElementById(key);
-        
+
         const children = tr.childNodes;
         for (let n = 0; n < children.length; ++n) {
           const c = children[n];
@@ -255,11 +308,11 @@
             });
           }
         }
-        
+
       }
-      
-      
-      
+
+
+
     });
 
   }
@@ -269,21 +322,21 @@
   function presentUI() {
     const main_div_el = document.getElementById("main");
 
-    const header_html = 
+    const header_html =
       '<img class="logo" src="assets/recorder-logo-blue.svg"><br/>\n' +
       '<a id="settings_aref" href="#"><img class="settings" src="assets/wrench.svg"></a>\n<br/>\n';
-    
+
     const footer_html = '';
-    
+
     const base_html =
       header_html +
       '<div id="uibody"></div>\n' +
       footer_html;
-    
+
     main_div_el.innerHTML = base_html;
-    
+
     uibody_el = document.getElementById("uibody");
-    
+
     // The settings reference
     const settings_aref = document.getElementById("settings_aref");
     settings_aref.addEventListener('click', function(evt) {
@@ -291,20 +344,20 @@
       evt.preventDefault();
       return false;
     });
-    
+
   }
 
 
   // Register a listener called on the page load event,
   document.addEventListener('DOMContentLoaded', () => {
-    
+
     // Present the UI,
     presentUI();
-    
+
     // Initially present the file list,
     presentFileList();
-    
+
   });
-  
+
 })();
 
