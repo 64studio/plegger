@@ -103,7 +103,7 @@
   // Present the WiFi configuration UI,
   function presentWiFi() {
     // Clear the UI body,
-    uibody_el.innerHTML = '<form><div id="wifi_current"></div><div id="wifi_external"></div><div id="wifi_connect"></div></form>';
+    uibody_el.innerHTML = '<div id="wifi_current"></div><div id="wifi_external"></div><div id="wifi_connect"></div>';
 
     const wifi_current_el = document.getElementById('wifi_current');
     const wifi_external_el = document.getElementById('wifi_external');
@@ -173,30 +173,38 @@
         // When we select, we change the UI so it provides a connect dialog,
 
         let bdy = '';
+        bdy += '<form id="connect_form">\n';
         bdy += '<table class="settings settings_connect">\n';
         bdy += '<tr><td>Connect To</td><td id="connect_to"></td></tr>\n';
         if (security === 'key') {
           bdy += '<tr><td>Password</td><td><input id="password_input" type="password" /></td></tr>';
         }
-        bdy += '<tr><td></td><td><input id="connect_btn" type="button" value="Connect" /></td></tr>\n';
+        bdy += '<tr><td></td><td><input id="connect_btn" type="submit" value="Connect" /></td></tr>\n';
         bdy += '</table>\n';
+        bdy += '</form>\n';
         
         wifi_connect_el.innerHTML = bdy;
         
         const connect_to_el = document.getElementById("connect_to");
         let password_input_el;
         if (security === 'key') password_input_el = document.getElementById("password_input");
+        const connect_form_el = document.getElementById("connect_form");
         const connect_btn_el = document.getElementById("connect_btn");
 
         // Set the ESSID in the UI,
         connect_to_el.textContent = name;
         // Action,
-        connect_btn_el.onclick = function() {
-          let passphrase = undefined;
+        connect_form_el.onsubmit = function(evt) {
+          evt.preventDefault();
+          let passphrase = null;
           if (password_input_el) {
             passphrase = password_input_el.value;
           }
-          tryWiFiConnect(name, passphrase);
+          tryWiFiConnect(name, passphrase, () => {
+            connect_btn_el.disabled = false;
+          });
+          connect_btn_el.disabled = true;
+          return false;
         };
 
       }
@@ -207,14 +215,16 @@
   }
 
   
-  function tryWiFiConnect(essid, passphrase) {
+  function tryWiFiConnect(essid, passphrase, callback) {
     // Send command to server to try and connect to this wifi,
     pleg_api.connectToWireless( essid, passphrase, (error, result) => {
       if (error) {
         console.error(error);
+        callback(error);
       }
       else {
         console.log("Connection responded: ", result);
+        callback(undefined, result);
       }
     });
     
