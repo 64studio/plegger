@@ -3,6 +3,7 @@
 // Is self-invocing function necessary anymore?
 (function() {
 
+  const url = require('url');
   const prettyBytes = require('pretty-bytes');
 
   const pleg_api = require('./pleg_api');
@@ -55,7 +56,11 @@
   let uibody_el;
 
   // The current UI state,
-  var ui_state = 'file';
+  let ui_state = 'file';
+
+  // If UI state is 'file' then the last file list retrieved,
+  let last_file_list;
+
 
 
   // Called when the 'listen' icon is selected.
@@ -67,6 +72,20 @@
     // ISSUE: Redirect to mp3 streamable version of file?
     window.location = 'serv/play/' + file.file;
 
+  }
+
+  // Called when the 'upload' icon is selected.
+  //   'file' is the file object to upload,
+  //   'el' is the DOM element (for UI effects),
+  function onFileUploadClick(evt, file, el, i) {
+    console.log("Upload file: ", file, el);
+    // Clear the UI body,
+    uibody_el.innerHTML = '';
+
+    // Our redirect,
+    var pleg_redirect = encodeURI('http://hw.plegger/mixcloud/rep/' + file.file);
+    // ISSUE: Redirect to MixCloud,
+    window.location = 'https://www.mixcloud.com/oauth/authorize?client_id=U78E4A3dcmzKwpsy7P&redirect_uri=' + pleg_redirect;
   }
 
   // Called when the 'download' icon is selected.
@@ -102,6 +121,8 @@
 
   // Present the WiFi configuration UI,
   function presentWiFi() {
+    // Reset state,
+    last_file_list = void 0;
     // Clear the UI body,
     uibody_el.innerHTML = '<div id="wifi_current"></div><div id="wifi_external"></div><div id="wifi_connect"></div>';
 
@@ -182,9 +203,9 @@
         bdy += '<tr><td></td><td><input id="connect_btn" type="submit" value="Connect" /></td></tr>\n';
         bdy += '</table>\n';
         bdy += '</form>\n';
-        
+
         wifi_connect_el.innerHTML = bdy;
-        
+
         const connect_to_el = document.getElementById("connect_to");
         let password_input_el;
         if (security === 'key') password_input_el = document.getElementById("password_input");
@@ -214,7 +235,7 @@
 
   }
 
-  
+
   function tryWiFiConnect(essid, passphrase, callback) {
     // Send command to server to try and connect to this wifi,
     pleg_api.connectToWireless( essid, passphrase, (error, result) => {
@@ -227,10 +248,57 @@
         callback(undefined, result);
       }
     });
-    
+
     console.log("Try CONNECT: ", essid, passphrase);
   }
-  
+
+
+
+  function updateFileListEntry(i, file) {
+
+    const file_time = new Date(file.modtime);
+    const dayhour = fileEntryFormatter.format(file_time);
+    const size = prettyBytes(file.size);
+
+    let bdy = '';
+    bdy += '<td class="file_day_hour">' + dayhour + '</td>\n';
+    bdy += '<td class="file_size">' + size + '</td>\n';
+    bdy += '<td class="file_listen"><a href="#"><img src="assets/headphones.svg" width="20"></a></td>\n';
+    bdy += '<td class="file_upload"><a href="#"><img src="assets/arrow-circle-top.svg" width="20"></a></td>\n';
+    bdy += '<td class="file_download"><a href="#"><img src="assets/arrow-circle-bottom.svg" width="20"></a></td>\n';
+
+    const tr = document.getElementById('aentry_' + i);
+    tr.innerHTML = bdy;
+
+    // Set up events,
+    const children = tr.childNodes;
+    for (let n = 0; n < children.length; ++n) {
+      const c = children[n];
+      if (c.className === 'file_listen') {
+        c.firstChild.addEventListener('click', function(evt) {
+          onFileListenClick(evt, file, c, i);
+          evt.preventDefault();
+          return false;
+        });
+      }
+      else if (c.className === 'file_upload') {
+        c.firstChild.addEventListener('click', function(evt) {
+          onFileUploadClick(evt, file, c, i);
+          evt.preventDefault();
+          return false;
+        });
+      }
+      else if (c.className === 'file_download') {
+        c.firstChild.addEventListener('click', function(evt) {
+          onFileDownloadClick(evt, file, c, i);
+          evt.preventDefault();
+          return false;
+        });
+      }
+    }
+
+  }
+
 
   // Present the file list UI,
   function presentFileList() {
@@ -242,6 +310,9 @@
       if (error) {
         throw error;
       }
+
+      // Store global state,
+      last_file_list = all_files;
 
       // The files list from the query,
       const files = all_files.files;
@@ -279,11 +350,6 @@
         const dayhour = fileEntryFormatter.format(file_time);
         const size = prettyBytes(file.size);
         bdy += '<tr id="aentry_' + i + '">\n';
-        bdy += '<td class="file_day_hour">' + dayhour + '</td>\n';
-        bdy += '<td class="file_size">' + size + '</td>\n';
-        bdy += '<td class="file_listen"><a href="#"><img src="assets/headphones.svg" width="20"></a></td>\n';
-        bdy += '<td class="file_upload"><a href="#"><img src="assets/arrow-circle-top.svg" width="20"></a></td>\n';
-        bdy += '<td class="file_download"><a href="#"><img src="assets/arrow-circle-bottom.svg" width="20"></a></td>\n';
         bdy += '</tr>\n';
 
       }
@@ -294,34 +360,11 @@
 
       uibody_el.innerHTML = bdy;
 
-      // After we've set the inner html, hook into the DOM,
-
+      // Update all the file entries,
       for (let i = 0; i < files.length; ++i) {
-        const key = 'aentry_' + i;
-        const tr = document.getElementById(key);
-
-        const children = tr.childNodes;
-        for (let n = 0; n < children.length; ++n) {
-          const c = children[n];
-          if (c.className === 'file_listen') {
-            c.firstChild.addEventListener('click', function(evt) {
-              onFileListenClick(evt, files[i], c, i);
-              evt.preventDefault();
-              return false;
-            });
-          }
-          else if (c.className === 'file_download') {
-            c.firstChild.addEventListener('click', function(evt) {
-              onFileDownloadClick(evt, files[i], c, i);
-              evt.preventDefault();
-              return false;
-            });
-          }
-        }
-
+        const file = files[i];
+        updateFileListEntry(i, file);
       }
-
-
 
     });
 
@@ -358,6 +401,27 @@
   }
 
 
+  function handleOperation(op) {
+    // Replace the browser's history state so the user
+    // doesn't 'back' into the command,
+    if (window.history) {
+      window.history.replaceState({}, '', '/');
+    }
+    if (op.startsWith('upload ')) {
+      // To upload,
+      const to_upload = op.substring(7);
+
+      // Update the UI to reflect the fact we are uploading,
+
+
+
+
+      console.log("HEY, we are going to upload: ", to_upload);
+    }
+  }
+
+
+
   // Register a listener called on the page load event,
   document.addEventListener('DOMContentLoaded', () => {
 
@@ -367,7 +431,16 @@
     // Initially present the file list,
     presentFileList();
 
+    // Any commands to execute?
+    const this_href = window.location.href;
+    const url_ob = url.parse(this_href, true);
+
+    const op = url_ob.query.op;
+
+    if (op !== void 0) {
+      handleOperation(op);
+    }
+
   });
 
 })();
-

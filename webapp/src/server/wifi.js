@@ -87,8 +87,8 @@ module.exports = function(net_interface) {
       fulloutput += data.toString();
     });
     // When finished,
-    p.stdout.on('close', (code) => {
-      callback(fulloutput);
+    p.on('close', (code, signal) => {
+      callback(fulloutput, code);
     });
     return p;
   }
@@ -124,7 +124,7 @@ module.exports = function(net_interface) {
   function scan(callback) {
 
     // Spawn the Linux command asynchronously,
-    const wifiscan = spawnLinuxProcess('iwlist', [net_interface, 'scan'], (fulloutput) => {
+    const wifiscan = spawnLinuxProcess('iwlist', [net_interface, 'scan'], (fulloutput, code) => {
 
       const result = {
         raw: []
@@ -184,7 +184,7 @@ module.exports = function(net_interface) {
   // Bring the network interface up,
   function up(callback) {
     // Spawn the Linux command asynchronously,
-    const up_cmd = spawnLinuxProcess('ip', [ 'link', 'set', net_interface, 'up' ], (fulloutput) => {
+    const up_cmd = spawnLinuxProcess('ip', [ 'link', 'set', net_interface, 'up' ], (fulloutput, code) => {
       callback( { status:'%SUCCESS:Interface up' } );
     });
   }
@@ -192,7 +192,7 @@ module.exports = function(net_interface) {
   // Bring the network interface down,
   function down(callback) {
     // Spawn the Linux command asynchronously,
-    const up_cmd = spawnLinuxProcess('ip', [ 'link', 'set', net_interface, 'down' ], (fulloutput) => {
+    const up_cmd = spawnLinuxProcess('ip', [ 'link', 'set', net_interface, 'down' ], (fulloutput, code) => {
       callback( { status:'%SUCCESS:Interface down' } );
     });
   }
@@ -439,7 +439,7 @@ module.exports = function(net_interface) {
   function connect(essid, passphrase, callback) {
 
     console.log("WIFI: Connect to %s pass: %s", essid, passphrase);
-  
+
     // Scan for wifi that matches essid
     scan( (result, err) => {
 
@@ -494,7 +494,7 @@ module.exports = function(net_interface) {
 
             // Generate the wpa_supplicant config file using the 'wpa_passphrase' linux command.
             const wpa_passph = spawnLinuxProcess('wpa_passphrase',
-                  [ sanitised_essid, sanitised_passphrase ], (fulloutput) => {
+                  [ sanitised_essid, sanitised_passphrase ], (fulloutput, code) => {
 
               // Write out the config file content,
               fs.writeFile( conf_filename, fulloutput, (err) => {

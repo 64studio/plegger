@@ -46,6 +46,7 @@ var plegger_service_api = serverApi( wifi );
 // The dynamic URIs,
 //app.get('/serv/api', bb_server_api);
 app.post('/serv/api', plegger_service_api);
+app.get('/mixcloud/rep/:filename', plegger_service_api);
 app.get('/serv/play/:filename', serverDl.player);
 app.get('/serv/dl/:filename', serverDl.downloader);
 
@@ -57,8 +58,3 @@ var http_port = config.http_port;
 app.listen(http_port, function () {
   console.log('Service started on port ' + http_port);
 });
-
-
-
-
-

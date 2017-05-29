@@ -1,2 +1,3 @@
 node_modules/**
 web/pleg_cfe.js
+secrets.js
