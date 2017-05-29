@@ -60,7 +60,7 @@
 
   // If UI state is 'file' then the last file list retrieved,
   let last_file_list;
-
+  const when_file_list = [];
 
 
   // Called when the 'listen' icon is selected.
@@ -83,7 +83,7 @@
     uibody_el.innerHTML = '';
 
     // Our redirect,
-    var pleg_redirect = encodeURI('http://hw.plegger/mixcloud/rep/' + file.file);
+    var pleg_redirect = encodeURIComponent('http://hw.plegger/mixcloud/rep/' + file.file);
     // ISSUE: Redirect to MixCloud,
     window.location = 'https://www.mixcloud.com/oauth/authorize?client_id=U78E4A3dcmzKwpsy7P&redirect_uri=' + pleg_redirect;
   }
@@ -253,6 +253,89 @@
   }
 
 
+  // Changes the UI so that we can enter a title and other information
+  // before uploading.
+  function setUploadUI(name, et) {
+    // Find the file name in the list,
+    const files = last_file_list.files;
+    let i = 0;
+    for (; i < files.length; ++i) {
+      const file_ob = files[i];
+      const filename = file_ob.file;
+      if (filename === name) {
+        break;
+      }
+    }
+
+    if (i < files.length) {
+
+      // Generate the upload form,
+      let upload_form = '';
+      upload_form += '<td class="file_upload_base" colspan="5"><form id="fupload_form" class="file_upload">\n';
+//      upload_form += '<t3>Upload to MixCloud</t3>\n';
+      upload_form += '<div class="input_title">Name</div>\n';
+      upload_form += '<input class="user_input" type="text" name="upload_name" />\n';
+      upload_form += '<div class="input_title">Description</div>\n';
+      upload_form += '<textarea class="user_input" name="upload_description"></textarea>\n';
+      upload_form += '<div id="upload_action_bar" class="button_bar">\n';
+
+      upload_form += '<input id="do_upload_btn" class="user_button" type="submit" name="action" value="Upload" />\n';
+      upload_form += '<input id="cancel_upload_btn" class="user_button" type="submit" name="action" value="Cancel" />\n';
+
+      upload_form += '</div>\n';
+      upload_form += '</form></td>\n';
+
+      const tr = document.getElementById('aentry_' + i);
+      tr.innerHTML = upload_form;
+
+      const do_upload_btn = document.getElementById("do_upload_btn");
+      const cancel_upload_btn = document.getElementById('cancel_upload_btn');
+      const fupload_form_el = document.getElementById("fupload_form");
+      // Action,
+      fupload_form_el.onsubmit = function(evt) {
+        // Kill this event,
+        evt.preventDefault();
+        return false;
+      };
+      do_upload_btn.onclick = function(evt) {
+        const upload_name = fupload_form_el.elements.upload_name.value;
+        const upload_description = fupload_form_el.elements.upload_description.value;
+
+        // Put up a 'please wait' status bar,
+        const bb = document.getElementById('upload_action_bar');
+        bb.innerHTML = '<h3 class="uploading_indicator">Uploading, Please Wait...</h3>';
+
+        // Upload the Mix Cloud,
+        pleg_api.uploadToMixCloud(name, et, upload_name, upload_description,
+                                  (error) => {
+          // Is there an error?
+          if (error) {
+            bb.innerHTML = '<h3 class="upload_errpr">Sorry, there was an error.</h3>';
+          }
+          else {
+            // Return file list to how it was before,
+            updateFileListEntry(i, files[i]);
+          }
+        });
+
+
+      };
+      cancel_upload_btn.onclick = function(evt) {
+        // Return file list to how it was before,
+        updateFileListEntry(i, files[i]);
+      };
+
+//      // Make sure this element is visible,
+//      tr.scrollIntoView();
+
+    }
+
+    console.log(last_file_list);
+    console.log("NAME = " + name);
+    console.log("ER = " + et);
+  }
+
+
 
   function updateFileListEntry(i, file) {
 
@@ -366,6 +449,12 @@
         updateFileListEntry(i, file);
       }
 
+      // Call any listeners waiting on this to be loaded,
+      for (let i = 0; i < when_file_list.length; ++i) {
+        when_file_list[i]();
+      }
+      when_file_list.length = 0;
+
     });
 
   }
@@ -401,7 +490,7 @@
   }
 
 
-  function handleOperation(op) {
+  function handleOperation(query, op) {
     // Replace the browser's history state so the user
     // doesn't 'back' into the command,
     if (window.history) {
@@ -413,10 +502,23 @@
 
       // Update the UI to reflect the fact we are uploading,
 
+      // The query encrypted token,
+      const et = query.et;
 
+      // Change the UI so that the entry is an upload,
+      if (last_file_list) {
+        // If file list aleady set then set it up now,
+        setUploadUI(to_upload, et);
+      }
+      else {
+        // Otherwise wait until it's set,
+        when_file_list.push(() => {
+          setUploadUI(to_upload, et);
+        });
+      }
 
-
-      console.log("HEY, we are going to upload: ", to_upload);
+//      console.log("HEY, we are going to upload: ", to_upload);
+//      console.log("WITH et = ", et);
     }
   }
 
@@ -433,12 +535,14 @@
 
     // Any commands to execute?
     const this_href = window.location.href;
+    console.log("this_href =", this_href);
     const url_ob = url.parse(this_href, true);
+    console.log(url_ob);
 
     const op = url_ob.query.op;
 
     if (op !== void 0) {
-      handleOperation(op);
+      handleOperation(url_ob.query, op);
     }
 
   });

@@ -21,7 +21,13 @@ function query(command, args, callback) {
     if (httpRequest.readyState === 4) {
       // Ok, request received,
       if (httpRequest.status === 200) {
-        callback( null, JSON.parse( httpRequest.responseText ) );
+        const rjson = JSON.parse( httpRequest.responseText );
+        if (rjson.error) {
+          callback( rjson );
+        }
+        else {
+          callback( null, rjson );
+        }
       }
       // Hmm, error,
       else {
@@ -38,13 +44,27 @@ function query(command, args, callback) {
 }
 
 
+// Upload data to mix cloud,
+function uploadToMixCloud(filename, et, given_name, given_desc, callback) {
+
+  const args = {
+    filename: filename,
+    et: et,
+    given_name: given_name,
+    given_desc: given_desc
+  };
+
+  query('performMixCloudUpload', args, callback);
+
+}
+
 
 // Queries the server API for the current WiFi info. The information is
 // returned in the callback; callback(error, wifi_info).
 function getWiFiInfo(callback) {
-  
+
   query('getWiFiInfo', [], callback);
-  
+
 }
 
 
@@ -52,9 +72,9 @@ function getWiFiInfo(callback) {
 // and connect to. The information is returned in the callback;
 // callback(error, wifi_hubs).
 function getWiFiAvailableHubs(callback) {
-  
+
   query('getWiFiAvailableHubs', [], callback);
-  
+
 }
 
 
@@ -66,27 +86,28 @@ function getFileList(sort_order, callback) {
   const args = {
     sort_order
   };
-  
+
   // Make the call to the server,
   query('getFileList', args, callback);
-  
+
 }
 
 function connectToWireless(essid, passphrase, callback) {
-  
+
   const args = {
     essid,
     passphrase
   }
-  
+
   query('connectToWireless', args, callback);
-  
+
 }
 
 
 module.exports = {
   getFileList,
   connectToWireless,
+  uploadToMixCloud,
   getWiFiInfo,
   getWiFiAvailableHubs
 };

@@ -6,6 +6,7 @@ var util = require('util');
 var request = require('request');
 var url = require("url");
 var spawn = require('child_process').spawn;
+var crypto = require('crypto');
 
 var config = require('../../bbconfig.js');
 var secrets = require('../../secrets.js');
@@ -15,19 +16,28 @@ var secrets = require('../../secrets.js');
 
 module.exports = function( wifi ) {
 
+  // Used for encryption,
+  var encryptor;
+  // Make an encryptor key
+  crypto.randomBytes(20, function(err, buffer) {
+    var secret_encryptor_key = buffer.toString('base64');
+    encryptor = require('simple-encryptor')(secret_encryptor_key);
+  });
+
   // Server side state
   // -----------------
 
-  // Stores the MixCloud auth code for the file requested to be
-  // uploaded. We hide this information from the client because
-  // the code gives user account privileges.
-  //
-  // NOTE: This is used to store state between the
-  //   'request upload' and 'actual upload' functions. Another
-  //   option to storing the state server side would be to
-  //   encrypt the code and give it to the client.
-  var auth_code_db = {};
+  // // Stores the MixCloud auth code for the file requested to be
+  // // uploaded. We hide this information from the client because
+  // // the code gives user account privileges.
+  // //
+  // // NOTE: This is used to store state between the
+  // //   'request upload' and 'actual upload' functions. Another
+  // //   option to storing the state server side would be to
+  // //   encrypt the code and give it to the client.
+  // var auth_code_db = {};
 
+  var currently_uploading = {};
 
   // The map of server commands,
   var server_commands = {};
@@ -168,9 +178,6 @@ module.exports = function( wifi ) {
 
   // https://www.mixcloud.com/oauth/access_token?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&client_secret=YOUR_CLIENT_SECRET&code=OAUTH_CODE
 
-  // NOTE: Side-effect of this call is that it updates
-  //   'auth_code_db'
-
   function mixCloudAuthorise(args, req, res) {
 
     var oauth_code = args.oauth_code;
@@ -179,7 +186,7 @@ module.exports = function( wifi ) {
     var mixcloud_client_id = secrets.mixcloud_client_id;
     var mixcloud_client_secret = secrets.mixcloud_client_secret;
 
-    var mixcloud_redirect = encodeURI('http://hw.plegger/mixcloud/rep/' + args.filename);
+    var mixcloud_redirect = encodeURIComponent('http://hw.plegger/mixcloud/rep/' + args.filename);
 
     // Make a request to the MixCloud API end point for an access
     // token.
@@ -202,15 +209,19 @@ module.exports = function( wifi ) {
           // Fetch the access token,
           var access_token = api_response_ob.access_token;
 
+          console.log("ISSUE access_token: ", access_token);
+
           // Give the access info to the client,
           // Command for client,
-          var client_command = encodeURI('upload ' + args.filename);
+          var client_command = encodeURIComponent('upload ' + args.filename);
 
-          // Update 'auth_code_db'
-          auth_code_db[args.filename] = access_token;
+          // Encrypted token,
+          var enc_token = encryptor.encrypt(access_token);
+
+          console.log("ISSUE access_token encoded: ", enc_token);
 
           // Redirect with URI encoded variables,
-          res.redirect('/?op=' + client_command);
+          res.redirect('/?op=' + client_command + '&et=' + encodeURIComponent(enc_token));
 
         }
         catch (e) {
@@ -224,14 +235,19 @@ module.exports = function( wifi ) {
 
 
   // Performs the actual upload operation,
-  server_commands.performUpload = function(args, req, res) {
+  server_commands.performMixCloudUpload = function(args, req, res) {
+
+    console.log("performMixCloudUpload");
+    console.log(args);
 
     var filename = args.filename;
 
+    // Encrypted token,
+    var et = args.et;
+
     var given_name = args.given_name;
-
-
-    if (given_name === void 0) {
+    var given_desc = args.given_desc;
+    if (given_name === void 0 || given_name.length < 2) {
       given_name = 'Music Upload';
     }
 
@@ -239,14 +255,42 @@ module.exports = function( wifi ) {
     filename = filename.replace('/', '');
     filename = filename.replace('\\', '');
 
-    // Fetch the auth code,
-    var access_token = auth_code_db[filename];
+    // Decrypt the auth code,
+    var access_token = encryptor.decrypt(et);
+
+    console.log("access_token = ", access_token);
 
     // If no access token then something weird happened,
-    if (access_token === void 0) {
-      completeResponseError(e, res);
+    if (access_token === void 0 || access_token === null) {
+      completeResponseError(Error('Invalid access token'), res);
     }
     else {
+
+      // Is this already being uploaded?
+      var unique_key = access_token + '.' + filename;
+      var upload_status = currently_uploading[unique_key];
+      if (upload_status === void 0) {
+        upload_status = { callbacks: [ ] };
+        currently_uploading[unique_key] = upload_status;
+      }
+
+      var time_now = Date.now();
+
+      if (upload_status.finished === true) {
+        if (time_now < upload_status.time_finished + 30000) {
+          completeResponse(upload_status.result, res);
+          return;
+        }
+        else {
+          delete upload_status.finished;
+          delete upload_status.result;
+        }
+      }
+      upload_status.callbacks.push(res);
+      if (upload_status.callbacks.length > 1) {
+        return;
+      }
+
       // Call the MixCloud API,
 
       var qual_filename = path.join(config.recordings_path, filename);
@@ -256,9 +300,12 @@ module.exports = function( wifi ) {
       curl_args.push('-F');
       curl_args.push('mp3=@' + qual_filename);
       curl_args.push('-F');
-      curl_args.push('name=Music Upload');
-      curl_args.push('https://api.mixcloud.com/upload/?access_token=' + encodeURI(access_token));
+      curl_args.push('name=' + given_name);
+      curl_args.push('-F');
+      curl_args.push('description=' + given_desc);
+      curl_args.push('https://api.mixcloud.com/upload/?access_token=' + encodeURIComponent(access_token));
 
+      console.log("Spawning 'curl' command with args: ", curl_args);
       var p = spawn('curl', curl_args);
       let fulloutput = '';
       // Concatenate string to output,
@@ -270,11 +317,32 @@ module.exports = function( wifi ) {
       });
       // When finished,
       p.on('close', (code, signal) => {
+        console.log("Curl complete!");
+        console.log("output:");
+        console.log(fulloutput);
+        console.log("Exit code: ", code);
         var result = {};
         result.upload_file = qual_filename;
         result.curl_exit_code = code;
         result.curl_output = fulloutput;
-        completeResponse(result, res);
+
+        upload_status.finished = true;
+        upload_status.time_finished = Date.now();
+        upload_status.result = result;
+        // Notify all the waiting response objects,
+        var check_res;
+        do {
+          check_res = upload_status.callbacks.pop();
+          if (check_res) {
+            try {
+              completeResponse(result, check_res);
+            }
+            catch (e) {
+              console.error(e);
+            }
+          }
+        } while (check_res);
+
       });
 
     }
