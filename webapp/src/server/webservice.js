@@ -2,12 +2,14 @@
 
 // Node.js HTTP service for the blue box UI.
 
-var config = require('../../bbconfig.json');
+var config = require('../../bbconfig');
 
 var express = require('express');
 var bodyParser = require('body-parser');
 var serverApi = require('./server_api');
 var serverDl = require('./server_dl');
+
+var wifiManager = require('./wifi');
 
 var app = express();
 
@@ -34,9 +36,17 @@ app.use( function(req, res, next) {
   }
 });
 
+// Create the wifi object,
+var wifi = wifiManager( config.internet_wireless_interface );
+
+// The plegger service API object with wifi,
+var plegger_service_api = serverApi( wifi );
+
+
 // The dynamic URIs,
 //app.get('/serv/api', bb_server_api);
-app.post('/serv/api', serverApi());
+app.post('/serv/api', plegger_service_api);
+app.get('/mixcloud/rep/:filename', plegger_service_api);
 app.get('/serv/play/:filename', serverDl.player);
 app.get('/serv/dl/:filename', serverDl.downloader);
 

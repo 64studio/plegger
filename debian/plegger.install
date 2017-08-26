@@ -1,4 +1,9 @@
-plegger usr/share/plegger
+plegger-recorder usr/share/plegger
+plegger-webapp usr/share/plegger
+first-time.sh usr/share/plegger
 webapp/* usr/share/plegger/webapp
-conf/hostapd.conf /etc/hostapd
-conf/dnsmasq.conf /etc/dnsmasq.d
+webapp/.babelrc usr/share/plegger/webapp
+conf/hostapd.conf etc/hostapd
+conf/dnsmasq.conf etc/dnsmasq.d
+conf/15-wlan0.network lib/systemd/network
+conf/15-wlan1.network lib/systemd/network

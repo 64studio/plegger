@@ -1,9 +1,0 @@
-{
-  "__http_port":80,
-  "http_port":8000,
-  "__landing_host":"hw.blueboxrecorder.com",
-  "landing_host":"localhost:8000",
-  
-  "recordings_path":"/home/pi/recordings"
-  
-}

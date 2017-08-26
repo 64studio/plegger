@@ -1,0 +1,9 @@
+upload button redirect: https://www.mixcloud.com/oauth/authorize?client_id={client_id}&redirect_uri=http://hw.plegger/mixcloud_upload?filename=2017-05-01_12-15-02.mp3
+mixcloud redirects to the URL with &code=???? at the end
+
+server side calls: https://www.mixcloud.com/oauth/access_token?client_id={client_id}&redirect_uri=http://hw.plegger/mixcloud_upload?filename=2017-05-01_12-15-02.mp3&client_secret={client_secret}&code={code}
+
+curl -F mp3=@upload.mp3 -F "name=API Upload" https://api.mixcloud.com/upload/?access_token=INSERT_ACCESS_TOKEN_HERE
+
+
+

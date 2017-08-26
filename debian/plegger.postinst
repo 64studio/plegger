@@ -1,9 +1,47 @@
 #!/bin/sh
-set -e if [ "$1" = 'configure' -a -n "$2" ]; then
+set -e
+if [ "$1" = 'configure' ]; then
     # install
     echo "DAEMON_CONF=\"/etc/hostapd/hostapd.conf\"" > /etc/default/hostapd
-    systemctl enable dnsmasq
-    systemctl enable hostapd
+    deb-systemd-invoke enable dnsmasq
+    deb-systemd-invoke start dnsmasq
+    deb-systemd-invoke enable hostapd
+    deb-systemd-invoke start hostapd
+    # Install and start recording daemon
+    #deb-systemd-invoke enable plegger
+    #deb-systemd-invoke start plegger
+
+    # make the recordings directory
+    mkdir -p /home/pi/recordings
+    chown -R pi:pi /home/pi/recordings
+
+    # add in symlink for nodejs
+    ln -s /usr/bin/nodejs /usr/bin/node
+
+    # remove the rainbow splash screen at bootup
+    echo "disable_splash=1" >> /boot/config.txt
+
+    # remove the console login that flashes before X starts
+    #systemctl disable getty@tty1
+
+    # add the soundcard module
+    echo "dtoverlay=audioinjector-wm8731-audio" >> /boot/config.txt
+    echo "dtoverlay=i2s-mmap" >> /boot/config.txt
+
+    # set CPUs to no throttling
+    #sed -i 's/^GOVERNOR=.*/GOVERNOR="performance"/' /etc/init.d/cpufrequtils
+
+    # disable bluetooth
+    #echo "dtoverlay=pi3-disable-bt" >> /boot/config.txt
+    #systemctl disable hciuart
+
+    # setup webapp
+    #cd /usr/share/plegger/webapp
+    #npm install
+    #npm install -g browserify
+    #browserify src/client/plegger_client.js -t babelify --outfile web/pleg_cfe.js
+
     exit 0
+fi
 
 #DEBHELPER#

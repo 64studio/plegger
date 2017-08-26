@@ -4,35 +4,35 @@ body {
     font-family: sans-serif;
     color: #fff;
   }
-  
+
   img {
     display: block;
     margin: auto;
-    width: 40px;  
-  }  
-  
+    width: 40px;
+  }
+
   img.logo {
     padding-bottom: 2px;
     border-bottom: 0.4em dotted #fff;
     margin: 0;
     width: 80%;
-    float: left;  
+    float: left;
   }
-  
+
   img.settings {
     padding: 10px;
     margin: 0;
     width: 50px;
-    float: right;  
+    float: right;
   }
-  
+
   table {
-    width: 100%; 
+    width: 100%;
   }
-  
+
   th {
     padding-top: 30px;
-    text-decoration: underline;  
+    text-decoration: underline;
   }
 
   td {
@@ -42,8 +42,27 @@ body {
     padding-left: 10px;
     padding-right: 10px;
     width: 20%;
-  }  
-  
+  }
+
   td:first-child {
     width: 40%;
+  }
+
+  td.file_upload_base {
+    background: #1c2b38;
+  }
+
+  form.file_upload input.user_input {
+    width: 100%;
+    font-size: 1em;
+  }
+  form.file_upload textarea.user_input {
+    width: 100%;
+    font-size: 1em;
+  }
+
+  form.file_upload input.user_button {
+    margin: 8px 5px 4px 14px;
+    padding: 5px 8px 5px 8px;
+    font-size: 1em;
   }

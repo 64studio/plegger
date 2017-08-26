@@ -1,7 +1,7 @@
 {
-  "name": "bluebox",
+  "name": "plegger",
   "version": "0.0.1",
-  "description": "UI for Blue Box",
+  "description": "Plegger System Client and Server",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,12 +9,14 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "body-parser": "^1.17.1",
-    "express": "^4.15.2",
-    "pretty-bytes": "^4.0.2"
+    "body-parser": "1.17.1",
+    "express": "4.15.2",
+    "pretty-bytes": "4.0.2",
+    "request": "2.81.0",
+    "simple-encryptor": "1.1.0"
   },
   "devDependencies": {
-    "babel-preset-env": "^1.2.2",
-    "babelify": "^7.3.0"
+    "babel-preset-env": "1.2.2",
+    "babelify": "7.3.0"
   }
 }
