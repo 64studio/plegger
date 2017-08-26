@@ -380,7 +380,7 @@ module.exports = function( wifi ) {
             var fdetail = {};
             fdetail.file = file;
             fdetail.size = stat_result.size;
-            fdetail.modtime = stat_result.mtime.getTime();
+            fdetail.modtime = stat_result.ctime.getTime();
 
             file_details.push(fdetail);
           }
