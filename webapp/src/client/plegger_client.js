@@ -343,9 +343,11 @@
     const dayhour = fileEntryFormatter.format(file_time);
     const size = prettyBytes(file.size);
 
+    const file_ext = file.file.substring(file.file.lastIndexOf(".")+1);
+
     let bdy = '';
     bdy += '<td class="file_day_hour">' + dayhour + '</td>\n';
-    bdy += '<td class="file_size">' + size + '</td>\n';
+    bdy += '<td class="file_size">' + size + '<br/>' + file_ext + '</td>\n';
     bdy += '<td class="file_listen"><a href="#"><img src="assets/headphones.svg" width="20"></a></td>\n';
     bdy += '<td class="file_upload"><a href="#"><img src="assets/arrow-circle-top.svg" width="20"></a></td>\n';
     bdy += '<td class="file_download"><a href="#"><img src="assets/arrow-circle-bottom.svg" width="20"></a></td>\n';
