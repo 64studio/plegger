@@ -16,7 +16,7 @@ if [ "$1" = 'configure' ]; then
     chown -R pi:pi /home/pi/recordings
 
     # add in symlink for nodejs
-    ln -s /usr/bin/nodejs /usr/bin/node
+    #ln -s /usr/bin/nodejs /usr/bin/node
 
     # remove the rainbow splash screen at bootup
     echo "disable_splash=1" >> /boot/config.txt
