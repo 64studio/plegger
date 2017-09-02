@@ -3,5 +3,10 @@
 	dh $@ --with=systemd
 
 override_dh_installinit:
-	dh_installinit --name=recorder
-	dh_installinit --name=webapp
+	dh_systemd_enable -pplegger --name=recorder recorder.service
+	dh_systemd_enable -pplegger --name=webapp webapp.service
+	dh_installinit -pplegger
+	dh_installinit -pplegger --name=recorder
+	dh_installinit -pplegger --name=webapp
+	dh_systemd_start -pplegger recorder.service --no-restart-on-upgrade
+	dh_systemd_start -pplegger webapp.service
