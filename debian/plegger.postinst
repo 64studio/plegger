@@ -7,9 +7,6 @@ if [ "$1" = 'configure' ]; then
     deb-systemd-invoke start dnsmasq
     deb-systemd-invoke enable hostapd
     deb-systemd-invoke start hostapd
-    # Install and start recording daemon
-    #deb-systemd-invoke enable plegger
-    #deb-systemd-invoke start plegger
 
     # make the recordings directory
     mkdir -p /home/pi/recordings
@@ -40,6 +37,14 @@ if [ "$1" = 'configure' ]; then
     #npm install
     #npm install -g browserify
     #browserify src/client/plegger_client.js -t babelify --outfile web/pleg_cfe.js
+
+    # Install and start recording daemon
+    deb-systemd-invoke enable recorder
+    deb-systemd-invoke start recorder
+
+    # Install and start webapp daemon
+    deb-systemd-invoke enable webapp
+    deb-systemd-invoke start webapp
 
     exit 0
 fi
