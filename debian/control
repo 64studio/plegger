@@ -2,7 +2,7 @@ Source: plegger
 Priority: optional
 Section: sound
 Maintainer: Chris Obbard <chris@64studio.com>
-Build-Depends: debhelper (>= 10), dh-systemd
+Build-Depends: debhelper (>= 10), dh-systemd, nodejs (>=6.11.2)
 Standards-Version: 3.9.8
 
 Package: plegger

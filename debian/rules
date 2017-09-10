@@ -1,6 +1,11 @@
 #!/usr/bin/make -f
+
 %:
 	dh $@ --with=systemd
+
+override_dh_auto_build:
+	. ./build.sh
+
 
 override_dh_installinit:
 	dh_systemd_enable -pplegger --name=recorder recorder.service
