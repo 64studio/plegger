@@ -5,7 +5,7 @@ Description="Recording script using sox"
 TimeoutStartSec=0
 User=pi
 ExecStart=/usr/share/plegger/plegger-recorder
-ExecReload=killall -s SIGTERM rec
+ExecReload=/usr/bin/killall -s SIGTERM rec
 Restart=always
 
 [Install]
